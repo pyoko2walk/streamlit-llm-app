@@ -17,12 +17,14 @@ st.write("""
 3. 回答が下に表示されます
 """)
 
-expert_type = st.radio(
-    "専門家の種類を選んでください：",
-    ("心理学者", "経済学者", "料理研究家")
-)
 
-user_input = st.text_area("質問を入力してください：", height=150)
+with st.form(key="qa_form", clear_on_submit=True):
+    expert_type = st.radio(
+        "専門家の種類を選んでください：",
+        ("心理学者", "経済学者", "料理研究家")
+    )
+    user_input = st.text_area("質問を入力してください：", height=150, key="user_input")
+    submitted = st.form_submit_button("送信")
 
 def get_llm_response(expert: str, question: str) -> str:
     """選択した専門家の視点から質問に回答する"""
@@ -42,10 +44,12 @@ def get_llm_response(expert: str, question: str) -> str:
     result = llm(messages)
     return result.content
 
-if st.button("送信"):
+if 'submitted' in locals() and submitted:
     if user_input.strip() == "":
         st.warning("質問を入力してください。")
     else:
+        st.write(f"選択した専門家: {expert_type}")
+        st.write(f"質問内容: {user_input}")
         with st.spinner("AIが考えています..."):
             answer = get_llm_response(expert_type, user_input)
         st.success("回答が生成されました：")
@@ -56,3 +60,4 @@ if st.button("送信"):
 # env\scripts\activate.bat
 # pip freeze > requirements.txt
 # streamlit run app.py (python app.py ではない)
+# Ctrl + C で停止
